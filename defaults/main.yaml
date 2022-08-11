@@ -1,0 +1,8 @@
+---
+guacamole__guacd_port: "4822"
+guacamole__version: "1.4.0"
+guacamole__tomcat_install: "yes"
+guacamole__xrdp_install: "yes"
+guacamole__lxqt_install: "yes"
+guacamole__username: "guacadmin"
+guacamole__password: "guacadmin"

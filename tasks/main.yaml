@@ -1,0 +1,146 @@
+- name: install dependencies
+  apt:
+    name: 
+     # make etc., necessary stuff for compiling 
+      - build-essential
+     # base dependencies 
+      - libcairo2-dev
+      - libjpeg-turbo8-dev
+      - libpng-dev
+      - libtool-bin
+      - uuid-dev
+      - libossp-uuid-dev
+     # RDP dependencies 
+      - freerdp2-dev
+     # SSH dependencies
+      - libpango1.0-dev
+      - libssh2-1-dev
+     # Ogg Vorbis dependencies
+      - libvorbis-dev
+     # WebP dependencies
+      - libwebp-dev
+     # OpenSSL dependencies
+      - libssl-dev
+     # FFmpeg (screen recording) dependencies
+      - libswscale-dev
+      - libavcodec-dev
+      - libavutil-dev
+      - libavformat-dev
+     # prevent WebSocket connection error after install
+      - libwebsockets-dev
+
+- name: install Tomcat 9
+  apt:
+    name:
+      - tomcat9
+      - tomcat9-admin
+      - tomcat9-common
+      - tomcat9-user
+    state: latest
+  when: guacamole__tomcat_install == "yes"
+ 
+- name: create Guacamole server temp dir
+  file:
+    state: directory
+    path: /tmp/guacamole-server/
+
+- name: download server archive and validate sha256 checksum
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/source/guacamole-server-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+
+- name: extract server archive
+  unarchive:
+    src: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+    remote_src: yes
+
+- name: configure (ignore errors due to OpenSSL 3.0 on Ubuntu 22)
+  shell: "CFLAGS=-Wno-error ./configure --with-systemd-dir=/etc/systemd/system/"
+  args:
+    chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
+
+- name: make 
+  command: make
+  args:
+    chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
+
+
+- name: make install 
+  command: make install
+  args:
+    chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
+
+- name: ldconfig
+  command: ldconfig
+  args:
+    chdir: /tmp/guacamole-server
+
+- name: reload Guacamole server daemon
+  systemd:
+    name: guacd
+    daemon_reload: yes
+    enabled: yes
+    state: started
+#
+- name: download Guacamole server war
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
+    dest: /var/lib/tomcat9/webapps/guacamole.war
+#
+- name: restart Tomcat daemon
+  systemd:
+    name: tomcat9
+    state: restarted
+#
+- name: restart Guacamole server daemon
+  systemd:
+    name: guacd
+    state: restarted
+#
+- name: create Guacamole dir
+  file:
+    state: directory
+    path: /etc/guacamole/
+
+- name: copy guacamole.properties
+  template:
+    src: guacamole.properties.j2
+    dest: /etc/guacamole/guacamole.properties
+    #owner: guacamole
+    #group: guacamole
+    mode: '0644'
+#
+- name: copy user-mapping.xml
+  template:
+    src: user-mapping.xml.j2
+    dest: /etc/guacamole/user-mapping.xml
+#    #owner: guacamole
+#    #group: guacamole
+    mode: '0644'
+#
+- name: restart Tomcat daemon
+  systemd:
+    name: tomcat9
+    state: restarted
+#
+- name: restart Guacamole server daemon
+  systemd:
+    name: guacd
+    state: restarted
+#
+- name: install xrdp
+  apt:
+    name: xrdp
+  when: guacamole__xrdp_install == "yes"
+
+- name: install LXQt desktop
+  apt:
+    name: lxqt-core
+  when: guacamole__lxqt_install == "yes"
+
+- name: delete temp dir
+  file:
+    state: absent
+    path: /tmp/guacamole-server/
+

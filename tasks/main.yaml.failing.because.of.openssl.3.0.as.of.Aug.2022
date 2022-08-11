@@ -1,0 +1,161 @@
+- name: install dependencies
+  apt:
+    name: 
+     # - wget
+     # - curl 
+     # - sudo
+     # - zip
+     # - unzip
+     # - tar
+     # - perl
+     # - expect
+      - build-essential
+     # base dependencies 
+      - libcairo2-dev
+      - libjpeg-turbo8-dev
+      - libpng-dev
+      - libtool-bin
+      - uuid-dev
+      - libossp-uuid-dev
+     # RDP dependencies 
+      - freerdp2-dev
+     # SSH dependencies
+      - libpango1.0-dev
+      - libssh2-1-dev
+     # Ogg Vorbis dependencies
+      - libvorbis-dev
+     # WebP dependencies
+      - libwebp-dev
+     # OpenSSL dependencies
+      - libssl-dev
+     # FFmpeg (screen recording) dependencies
+      - libswscale-dev
+      - libavcodec-dev
+      - libavutil-dev
+      - libavformat-dev
+
+#- name: install Tomcat 9
+#  apt:
+#    name:
+#      - tomcat9
+#      - tomcat9-admin
+#      - tomcat9-common
+#      - tomcat9-user
+#    state: latest
+#  when: guacamole__tomcat_install == "yes"
+  
+
+##- name: install packages necessary for Japanese support
+##  apt:
+##    name:
+##      - "*japanese*"
+##      - fonts-arphic-ukai
+##      - fonts-arphic-uming
+##      - fonts-ipafont-mincho
+##      - fonts-ipafont-gothic
+##      - fonts-unfonts-core
+##      - language-pack-ja
+##    state: present
+# 
+#- name: create Guacamole server temp dir
+#  file:
+#    state: directory
+#    path: /tmp/guacamole-server/
+
+- name: download server archive and validate sha256 checksum
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/source/guacamole-server-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+    checksum: sha256:https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/source/guacamole-server-{{ guacamole__version }}.tar.gz.sha256
+
+###- name: download server archive signature
+###  get_url:
+###    url: https://downloads.apache.org/guacamole/{{ guacamole__version }}/source/guacamole-server-{{ guacamole__version }}.tar.gz.asc
+###    dest: /tmp/guacamole-server/
+
+###- name: validate server archive
+
+- name: extract server archive
+  unarchive:
+    src: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+    remote_src: yes
+
+- name: configure Guacamole server
+  command: ./configure --with-init-dir=/etc/init.d
+  args:
+    chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
+#
+#- name: check if Guacamole server dependencies are met
+#  assert:
+#    stat: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/config.status
+#
+- name: make Guacamole server
+  command: make
+  args:
+    chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
+
+#
+#- name: make install Guacamole server
+#  command: make install
+#  args:
+#    chdir: /tmp/guacamole-server
+#
+#- name: ldconfig
+#  command: ldconfig
+#  args:
+#    chdir: /tmp/guacamole-server
+#
+#- name: reload Guacamole server daemon
+#  systemd:
+#    name: guacd
+#    daemon_reload: yes
+#    enabled: yes
+#    state: started
+#
+#- name: download Guacamole server war
+#  get_url:
+#    url: https://downloads.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
+#    dest: /var/lib/tomcat9/webapps/guacamole.war
+#
+#- name: restart Tomcat daemon
+#  systemd:
+#    name: tomcat9
+#    state: restarted
+#
+#- name: restart Guacamole server daemon
+#  systemd:
+#    name: guacd
+#    state: restarted
+#
+#- name: copy guacamole.properties
+#  template:
+#    src: guacamole.properties.j2
+#    dest: /etc/guacamole/guacamole.properties
+#    #owner: guacamole
+#    #group: guacamole
+#    mode: '0644'
+#
+#- name: copy user-mapping.xml
+#  template:
+#    src: user-mapping.xml.j2
+#    dest: /etc/guacamole/user-mapping.xml
+#    #owner: guacamole
+#    #group: guacamole
+#    mode: '0644'
+#
+#- name: restart Tomcat daemon
+#  systemd:
+#    name: tomcat9
+#    state: restarted
+#
+#- name: restart Guacamole server daemon
+#  systemd:
+#    name: guacd
+#    state: restarted
+#
+#- name: install xrdp and LXQt desktop
+#  apt:
+#    name:
+#      - xrdp
+#      - lxqt-core
