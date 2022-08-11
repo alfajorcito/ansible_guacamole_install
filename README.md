@@ -1,6 +1,6 @@
-Role installing Apache Guacamole on Ubuntu.
+Installs Apache Guacamole on Ubuntu.
 
-### Tested operating systems
+### Tested on
 * Ubuntu 22.04
 
 ### Features
@@ -9,3 +9,5 @@ Role installing Apache Guacamole on Ubuntu.
 * TOTP auth: TODO
 * Session recordings: TODO
 
+### Vars
+TODO
