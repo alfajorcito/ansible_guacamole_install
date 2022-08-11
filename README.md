@@ -1,4 +1,6 @@
-Installs Apache Guacamole on Ubuntu.
+# ansible_guacamole_install
+
+Ansible role installing Apache Guacamole on Ubuntu.
 
 ### Tested on
 * Ubuntu 22.04
