@@ -6,11 +6,12 @@ Ansible role installing Apache Guacamole on Ubuntu.
 * Ubuntu 22.04
 
 ### Features
-* Basic (XML) auth: DONE
+* Install Tomcat
+* Basic (XML) auth
 * MySQL auth: TODO
 * TOTP auth: TODO
-* Session recordings: TODO
-* (Option) Install Tomcat, LXQt and XRDP: DONE
+* Session recording: TODO
+* (Option) Install LXQt and xrdp: DONE
 
 ### Vars
 TODO
