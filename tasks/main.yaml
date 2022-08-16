@@ -38,7 +38,7 @@
       - tomcat9-user
     state: latest
   when: guacamole__tomcat_install == "yes"
- 
+
 - name: create Guacamole server temp dir
   file:
     state: directory
@@ -65,7 +65,6 @@
   args:
     chdir: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}/
 
-
 - name: make install 
   command: make install
   args:
@@ -82,53 +81,114 @@
     daemon_reload: yes
     enabled: yes
     state: started
-#
+
 - name: download Guacamole server war
   get_url:
     url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
     dest: /var/lib/tomcat9/webapps/guacamole.war
-#
-- name: restart Tomcat daemon
-  systemd:
-    name: tomcat9
-    state: restarted
-#
-- name: restart Guacamole server daemon
-  systemd:
-    name: guacd
-    state: restarted
-#
-- name: create Guacamole dir
-  file:
-    state: directory
-    path: /etc/guacamole/
 
-- name: copy guacamole.properties
+- name: download JDBC auth archive 
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-auth-jdbc-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+
+- name: extract JDBC auth archive
+  unarchive:
+    src: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+    remote_src: yes
+
+- name: copy JDBC MySQL auth war to /etc/guacamole/extensions
+  copy:
+    src: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/guacamole-auth-jdbc-mysql-{{ guacamole__version}}.jar
+    dest: /etc/guacamole/extensions/
+    remote_src: yes
+
+- name: create guacd database inside MySQL
+  mysql_db:
+    login_host: "{{ guacamole__mysql_host }}"
+    login_user: "{{ guacamole__mysql_root_user }}"
+    login_password: "{{ guacamole__mysql_root_password }}"
+    name: "{{ guacamole__mysql_db }}"
+    state: present
+
+- name: create guacd_admin user inside MySQL
+  mysql_user:
+    login_host: "{{ guacamole__mysql_host }}"
+    login_user: "{{ guacamole__mysql_root_user }}"
+    login_password: "{{ guacamole__mysql_root_password }}"
+    name: "{{ guacamole__mysql_user }}"
+    host: localhost
+    password: "{{ guacamole__mysql_password }}"
+    priv:
+      '"{{ guacamole__mysql_db }}".*': 'SELECT,UPDATE,INSERT,DELETE'
+
+- name: import 001-create-schema.sql
+  mysql_db:
+    login_host: "{{ guacamole__mysql_host }}"
+    login_user: "{{ guacamole__mysql_root_user }}"
+    login_password: "{{ guacamole__mysql_root_password }}"
+    name: "{{ guacamole__mysql_db }}"
+    state: import
+    target: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/schema/001-create-schema.sql
+
+- name: import 002-create-admin-user.sql
+  mysql_db:
+    login_host: "{{ guacamole__mysql_host }}"
+    login_user: "{{ guacamole__mysql_root_user }}"
+    login_password: "{{ guacamole__mysql_root_password }}"
+    name: "{{ guacamole__mysql_db }}"
+    state: import
+    target: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/schema/002-create-admin-user.sql
+
+- name: download MySQL JDBC connector
+  get_url:
+    url: https://dev.mysql.com/get/Downloads/Connector-J/"{{ guacamole__mysql_connector_java }}".tar.gz
+    dest: /tmp/guacamole-server/
+
+- name: extract MySQL JDBC connector
+  unarchive:
+    src: /tmp/guacamole-server/"{{ guacamole__mysql_connector_java }}".tar.gz
+    dest: /tmp/guacamole-server/
+    remote_src: yes
+
+- name: copy MySQL JDBC connector to /etc/guacamole/lib
+  copy:
+    src: /tmp/guacamole-server/"{{ guacamole__mysql_connector_java }}"/"{{ guacamole__mysql_connector_java }}".jar
+    dest: /etc/guacamole/lib/
+    remote_src: yes
+
+- name: copy guacamole.properties (MySQL auth)
   template:
-    src: guacamole.properties.j2
+    src: guacamole.properties.mysql.j2
     dest: /etc/guacamole/guacamole.properties
-    #owner: guacamole
-    #group: guacamole
     mode: '0644'
-#
-- name: copy user-mapping.xml
+  when: guacamole__mysql_auth == 'yes'
+
+- name: copy guacamole.properties (XML auth)
   template:
-    src: user-mapping.xml.j2
-    dest: /etc/guacamole/user-mapping.xml
-#    #owner: guacamole
-#    #group: guacamole
+    src: guacamole.properties.xml.j2
+    dest: /etc/guacamole/guacamole.properties
     mode: '0644'
-#
+  when: guacamole__mysql_auth == 'yes'
+
+- name: copy user-mapping.xml (XML auth)
+  template:
+    src: user-mapping.j2
+    dest: /etc/guacamole/user-mapping.xml
+    mode: '0644'
+  when: guacamole__mysql_auth != 'yes'
+
 - name: restart Tomcat daemon
   systemd:
     name: tomcat9
     state: restarted
-#
+
 - name: restart Guacamole server daemon
   systemd:
     name: guacd
     state: restarted
-#
+
 - name: install xrdp
   apt:
     name: xrdp

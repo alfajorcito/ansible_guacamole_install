@@ -18,7 +18,7 @@ Ansible role installing Apache Guacamole on Ubuntu.
   * MySQL (TODO)
   * TOTP (requires MySQL, TODO)
 * Session recording: TODO
-* Install LXQt and xrdp
+* Optionally, install LXQt and xrdp
 
 ### Vars
 TODO
