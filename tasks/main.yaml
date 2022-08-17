@@ -44,12 +44,12 @@
     state: directory
     path: /tmp/guacamole-server/
 
-- name: download server archive and validate sha256 checksum
+- name: download Guacamole server archive
   get_url:
     url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/source/guacamole-server-{{ guacamole__version }}.tar.gz
     dest: /tmp/guacamole-server/
 
-- name: extract server archive
+- name: extract Guacamole server archive
   unarchive:
     src: /tmp/guacamole-server/guacamole-server-{{ guacamole__version }}.tar.gz
     dest: /tmp/guacamole-server/
@@ -104,7 +104,7 @@
     dest: /etc/guacamole/extensions/
     remote_src: yes
 
-- name: create guacd database inside MySQL
+- name: create Guacamole database inside MySQL
   mysql_db:
     login_host: "{{ guacamole__mysql_host }}"
     login_user: "{{ guacamole__mysql_root_user }}"
@@ -112,16 +112,15 @@
     name: "{{ guacamole__mysql_db }}"
     state: present
 
-- name: create guacd_admin user inside MySQL
+- name: create Guacamole admin user inside MySQL
   mysql_user:
     login_host: "{{ guacamole__mysql_host }}"
     login_user: "{{ guacamole__mysql_root_user }}"
     login_password: "{{ guacamole__mysql_root_password }}"
     name: "{{ guacamole__mysql_user }}"
-    host: localhost
+    host: "{{ guacamole__mysql_host }}"
     password: "{{ guacamole__mysql_password }}"
-    priv:
-      '{{ guacamole__mysql_db }}.*': 'SELECT,UPDATE,INSERT,DELETE'
+    priv: "{{ guacamole__mysql_db }}.*:SELECT,UPDATE,INSERT,DELETE"
 
 - name: import 001-create-schema.sql
   mysql_db:
