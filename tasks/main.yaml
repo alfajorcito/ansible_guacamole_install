@@ -121,7 +121,7 @@
     host: localhost
     password: "{{ guacamole__mysql_password }}"
     priv:
-      '"{{ guacamole__mysql_db }}".*': 'SELECT,UPDATE,INSERT,DELETE'
+      '{{ guacamole__mysql_db }}.*': 'SELECT,UPDATE,INSERT,DELETE'
 
 - name: import 001-create-schema.sql
   mysql_db:
@@ -143,18 +143,18 @@
 
 - name: download MySQL JDBC connector
   get_url:
-    url: https://dev.mysql.com/get/Downloads/Connector-J/"{{ guacamole__mysql_connector_java }}".tar.gz
+    url: https://dev.mysql.com/get/Downloads/Connector-J/{{ guacamole__mysql_connector_java }}.tar.gz
     dest: /tmp/guacamole-server/
 
 - name: extract MySQL JDBC connector
   unarchive:
-    src: /tmp/guacamole-server/"{{ guacamole__mysql_connector_java }}".tar.gz
+    src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}.tar.gz
     dest: /tmp/guacamole-server/
     remote_src: yes
 
 - name: copy MySQL JDBC connector to /etc/guacamole/lib
   copy:
-    src: /tmp/guacamole-server/"{{ guacamole__mysql_connector_java }}"/"{{ guacamole__mysql_connector_java }}".jar
+    src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}/{{ guacamole__mysql_connector_java }}.jar
     dest: /etc/guacamole/lib/
     remote_src: yes
 
@@ -170,7 +170,7 @@
     src: guacamole.properties.xml.j2
     dest: /etc/guacamole/guacamole.properties
     mode: '0644'
-  when: guacamole__mysql_auth == 'yes'
+  when: guacamole__mysql_auth != 'yes'
 
 - name: copy user-mapping.xml (XML auth)
   template:
