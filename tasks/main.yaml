@@ -75,17 +75,17 @@
   args:
     chdir: /tmp/guacamole-server
 
+- name: download Guacamole server war
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
+    dest: /var/lib/tomcat9/webapps/guacamole.war
+
 - name: reload Guacamole server daemon
   systemd:
     name: guacd
     daemon_reload: yes
     enabled: yes
     state: started
-
-- name: download Guacamole server war
-  get_url:
-    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
-    dest: /var/lib/tomcat9/webapps/guacamole.war
 
 - name: download JDBC auth archive 
   get_url:
@@ -103,6 +103,14 @@
     src: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/guacamole-auth-jdbc-mysql-{{ guacamole__version}}.jar
     dest: /etc/guacamole/extensions/
     remote_src: yes
+
+- name: create Guacamole database inside MySQL
+  mysql_db:
+    login_host: localhost 
+    login_user: root
+    login_password: root
+    name: guacd
+    state: present
 
 - name: create Guacamole database inside MySQL
   mysql_db:
@@ -178,16 +186,6 @@
     mode: '0644'
   when: guacamole__mysql_auth != 'yes'
 
-- name: restart Tomcat daemon
-  systemd:
-    name: tomcat9
-    state: restarted
-
-- name: restart Guacamole server daemon
-  systemd:
-    name: guacd
-    state: restarted
-
 - name: install xrdp
   apt:
     name: xrdp
@@ -197,6 +195,16 @@
   apt:
     name: lxqt-core
   when: guacamole__lxqt_install == "yes"
+
+- name: restart Tomcat daemon
+  systemd:
+    name: tomcat9
+    state: restarted
+
+- name: restart Guacamole server daemon
+  systemd:
+    name: guacd
+    state: restarted
 
 - name: delete temp dir
   file:
