@@ -1,25 +1,27 @@
 # ansible_guacamole_install
 Ansible role installing Apache Guacamole on Ubuntu. 
-(WARNING: THIS IS NOT WORKING PROPERLY YET = WORK IN PROGRESS)
 
 ### Tested on
+* Ubuntu 20.04
 * Ubuntu 22.04
 
 ### Tested with
 * Ansible 2.10
   * community.mysql 1.2.0
+* MySQL 8.0.30
 
 ### Requirements
-* Local MySQL (optional, required if using DB auth)
+* Local MySQL (optional, required if using DB authentication)
 
 ### Features
-* Deployed with Tomcat
+* Deploy with Tomcat (installed optionally)
+* Install xrdp, LXQt
 * Authentication
   * default
   * MySQL
-  * TOTP (requires MySQL, TODO)
-* Session recording: TODO
-* Optionally, install LXQt and xrdp
+  * TOTP (requires MySQL, WIP)
+* Manage groups and users: TODO
+* Manage connections: TODO
 
 ### Vars
 TODO
