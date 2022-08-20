@@ -80,13 +80,6 @@
     url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-{{ guacamole__version }}.war
     dest: /var/lib/tomcat9/webapps/guacamole.war
 
-- name: reload Guacamole server daemon
-  systemd:
-    name: guacd
-    daemon_reload: yes
-    enabled: yes
-    state: started
-
 - name: download JDBC auth archive 
   get_url:
     url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-auth-jdbc-{{ guacamole__version }}.tar.gz
@@ -149,20 +142,20 @@
 
 - name: download MySQL JDBC connector
   get_url:
-    url: https://dev.mysql.com/get/Downloads/Connector-J/{{ guacamole__mysql_connector_java }}.tar.gz
+    url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-{{ guacamole__mysql_connector_java_ver }}.tar.gz
     dest: /tmp/guacamole-server/
   when: guacamole__mysql_auth == 'yes'
 
 - name: extract MySQL JDBC connector
   unarchive:
-    src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}.tar.gz
+    src: /tmp/guacamole-server/mysql-connector-java-{{ guacamole__mysql_connector_java_ver }}.tar.gz
     dest: /tmp/guacamole-server/
     remote_src: yes
   when: guacamole__mysql_auth == 'yes'
 
 - name: copy MySQL JDBC connector to /etc/guacamole/lib
   copy:
-    src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}/{{ guacamole__mysql_connector_java }}.jar
+    src: /tmp/guacamole-server/mysql-connector-java-{{ guacamole__mysql_connector_java_ver }}/mysql-connector-java-{{ guacamole__mysql_connector_java_ver }}.jar
     dest: /etc/guacamole/lib/
     remote_src: yes
   when: guacamole__mysql_auth == 'yes'
@@ -187,6 +180,26 @@
     dest: /etc/guacamole/user-mapping.xml
     mode: '0644'
   when: guacamole__mysql_auth != 'yes'
+
+- name: download TOTP auth archive 
+  get_url:
+    url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-auth-totp-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+  when: guacamole__mysql_auth == 'yes' and guacamole__totp_auth == 'yes'
+
+- name: extract TOTP auth archive
+  unarchive:
+    src: /tmp/guacamole-server/guacamole-auth-totp-{{ guacamole__version }}.tar.gz
+    dest: /tmp/guacamole-server/
+    remote_src: yes
+  when: guacamole__mysql_auth == 'yes' and guacamole__totp_auth == 'yes'
+
+- name: copy JDBC TOTP auth war to /etc/guacamole/extensions
+  copy:
+    src: /tmp/guacamole-server/guacamole-auth-totp-{{ guacamole__version }}/guacamole-auth-totp-mysql-{{ guacamole__version}}.jar
+    dest: /etc/guacamole/extensions/
+    remote_src: yes
+  when: guacamole__mysql_auth == 'yes' and guacamole__totp_auth == 'yes'
 
 - name: install xrdp
   apt:
