@@ -91,26 +91,21 @@
   get_url:
     url: https://dlcdn.apache.org/guacamole/{{ guacamole__version }}/binary/guacamole-auth-jdbc-{{ guacamole__version }}.tar.gz
     dest: /tmp/guacamole-server/
+  when: guacamole__mysql_auth == 'yes'
 
 - name: extract JDBC auth archive
   unarchive:
     src: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}.tar.gz
     dest: /tmp/guacamole-server/
     remote_src: yes
+  when: guacamole__mysql_auth == 'yes'
 
 - name: copy JDBC MySQL auth war to /etc/guacamole/extensions
   copy:
     src: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/guacamole-auth-jdbc-mysql-{{ guacamole__version}}.jar
     dest: /etc/guacamole/extensions/
     remote_src: yes
-
-- name: create Guacamole database inside MySQL
-  mysql_db:
-    login_host: localhost 
-    login_user: root
-    login_password: root
-    name: guacd
-    state: present
+  when: guacamole__mysql_auth == 'yes'
 
 - name: create Guacamole database inside MySQL
   mysql_db:
@@ -119,6 +114,7 @@
     login_password: "{{ guacamole__mysql_root_password }}"
     name: "{{ guacamole__mysql_db }}"
     state: present
+  when: guacamole__mysql_auth == 'yes'
 
 - name: create Guacamole admin user inside MySQL
   mysql_user:
@@ -129,6 +125,7 @@
     host: "{{ guacamole__mysql_host }}"
     password: "{{ guacamole__mysql_password }}"
     priv: "{{ guacamole__mysql_db }}.*:SELECT,UPDATE,INSERT,DELETE"
+  when: guacamole__mysql_auth == 'yes'
 
 - name: import 001-create-schema.sql
   mysql_db:
@@ -138,6 +135,7 @@
     name: "{{ guacamole__mysql_db }}"
     state: import
     target: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/schema/001-create-schema.sql
+  when: guacamole__mysql_auth == 'yes'
 
 - name: import 002-create-admin-user.sql
   mysql_db:
@@ -147,23 +145,27 @@
     name: "{{ guacamole__mysql_db }}"
     state: import
     target: /tmp/guacamole-server/guacamole-auth-jdbc-{{ guacamole__version }}/mysql/schema/002-create-admin-user.sql
+  when: guacamole__mysql_auth == 'yes'
 
 - name: download MySQL JDBC connector
   get_url:
     url: https://dev.mysql.com/get/Downloads/Connector-J/{{ guacamole__mysql_connector_java }}.tar.gz
     dest: /tmp/guacamole-server/
+  when: guacamole__mysql_auth == 'yes'
 
 - name: extract MySQL JDBC connector
   unarchive:
     src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}.tar.gz
     dest: /tmp/guacamole-server/
     remote_src: yes
+  when: guacamole__mysql_auth == 'yes'
 
 - name: copy MySQL JDBC connector to /etc/guacamole/lib
   copy:
     src: /tmp/guacamole-server/{{ guacamole__mysql_connector_java }}/{{ guacamole__mysql_connector_java }}.jar
     dest: /etc/guacamole/lib/
     remote_src: yes
+  when: guacamole__mysql_auth == 'yes'
 
 - name: copy guacamole.properties (MySQL auth)
   template:
