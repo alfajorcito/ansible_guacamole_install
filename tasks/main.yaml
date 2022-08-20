@@ -196,7 +196,7 @@
 
 - name: copy JDBC TOTP auth war to /etc/guacamole/extensions
   copy:
-    src: /tmp/guacamole-server/guacamole-auth-totp-{{ guacamole__version }}/guacamole-auth-totp-mysql-{{ guacamole__version}}.jar
+    src: /tmp/guacamole-server/guacamole-auth-totp-{{ guacamole__version }}/guacamole-auth-totp-{{ guacamole__version}}.jar
     dest: /etc/guacamole/extensions/
     remote_src: yes
   when: guacamole__mysql_auth == 'yes' and guacamole__totp_auth == 'yes'

@@ -34,7 +34,7 @@ guacamole__xrdp_install: "yes"
 guacamole__lxqt_install: "yes"
 guacamole__username: "guacadmin" # value fixed @ MySQL auth, can be changed if using XML auth
 guacamole__password: "guacadmin" # same as above
-guacamole__mysql_auth: "yes" # change this to any other value in order to use XML auth instead
+guacamole__mysql_auth: "yes" # to use XML-based auth, change this to any other value
 guacamole__mysql_host: "localhost"
 guacamole__mysql_db: "guacd"
 guacamole__mysql_root_user: "root"
@@ -42,5 +42,5 @@ guacamole__mysql_root_password: "root"
 guacamole__mysql_user: "guacadmin"
 guacamole__mysql_password: "guacadmin"
 guacamole__mysql_connector_java_ver: "8.0.30"
-guacamole__totp_auth: "yes"
+guacamole__totp_auth: "yes" # valid only if using MySQL auth
 ```
