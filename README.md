@@ -28,7 +28,7 @@ Ansible role installing Apache Guacamole on Ubuntu.
 ### Vars (including default values)
 ```
 guacamole__guacd_port: "4822"
-guacamole__version: "1.4.0"
+guacamole__version: "1.5.0"
 guacamole__tomcat_install: "yes"
 guacamole__xrdp_install: "yes"
 guacamole__lxqt_install: "yes"
@@ -41,6 +41,6 @@ guacamole__mysql_root_user: "root"
 guacamole__mysql_root_password: "root"
 guacamole__mysql_user: "guacadmin"
 guacamole__mysql_password: "guacadmin"
-guacamole__mysql_connector_java_ver: "8.0.30"
+guacamole__mysql_connector_java_ver: "8.0.32"
 guacamole__totp_auth: "yes" # valid only if using MySQL auth
 ```
