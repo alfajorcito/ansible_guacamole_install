@@ -8,7 +8,7 @@ Ansible role installing Apache Guacamole on Ubuntu.
 ### Tested with
 * Ansible 2.10
   * community.mysql 1.2.0
-* Guacamole 1.4.0
+* Guacamole 1.4.0, 1.5.0
 * MySQL 8.0.30
 * Tomcat 9.0.31
 
