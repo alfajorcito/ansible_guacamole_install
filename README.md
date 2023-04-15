@@ -27,7 +27,7 @@ Ansible role installing Apache Guacamole on Ubuntu.
 ### Vars (including default values)
 ```
 guacamole__guacd_port: "4822"
-guacamole__version: "1.5.0"
+guacamole__version: "1.5.1"
 guacamole__tomcat_install: "yes"
 guacamole__xrdp_install: "yes"
 guacamole__lxqt_install: "yes"

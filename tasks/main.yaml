@@ -28,6 +28,8 @@
       - libavformat-dev
      # prevent WebSocket connection error after install
       - libwebsockets-dev
+     # used to download external archives
+      - wget
 
 - name: install Tomcat 9
   apt:
@@ -141,9 +143,13 @@
   when: guacamole__mysql_auth == 'yes'
 
 - name: download MySQL JDBC connector
-  get_url:
-    url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-{{ guacamole__mysql_connector_java_ver }}.tar.gz
-    dest: /tmp/guacamole-server/
+  command: wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-{{ guacamole__mysql_connector_java_ver }}.tar.gz
+  args:
+    chdir: /tmp/guacamole-server
+  # the following is resulting in 403 errors as of Apr 2023
+  #get_url:
+  #  url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-{{ guacamole__mysql_connector_java_ver }}.tar.gz
+  #  dest: /tmp/guacamole-server/
   when: guacamole__mysql_auth == 'yes'
 
 - name: extract MySQL JDBC connector
